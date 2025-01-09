@@ -1,7 +1,24 @@
-import { defineStore } from 'pinia'
+import { ref } from "vue";
+import { defineStore } from "pinia";
 
 export const useStore = defineStore('store', () => {
-  // Add your state management code here
+  const firstName = ref("");
+  const lastName = ref("");
+  const email = ref("");
+  const password = ref("");
+  const cart = ref(new Map());
 
-  return { }
-})
+  const addToCart = (id, item) => {
+    const tempCart = new Map(cart.value);
+    tempCart.set(id, item);
+    cart.value = tempCart;
+  };
+
+  const removeFromCart = (id) => {
+    const tempCart = new Map(cart.value);
+    tempCart.delete(id);
+    cart.value = tempCart;
+  };
+
+  return { firstName, lastName, email, password, cart, addToCart, removeFromCart };
+});
