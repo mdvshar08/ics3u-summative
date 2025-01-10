@@ -28,7 +28,7 @@
   <div class="buttons" v-if="!isHomePage">
     <RouterLink to="/cart" class="button">Cart</RouterLink>
     <RouterLink to="/settings" class="button">Settings</RouterLink>
-    <RouterLink to="/" class="button">Logout</RouterLink>
+    <RouterLink to="/" class="button">Logout</RouterLink> 
   </div>
 </template>
 <style scoped>
