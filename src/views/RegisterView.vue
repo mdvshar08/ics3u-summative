@@ -14,8 +14,19 @@ const firstName = ref('');
 const lastName = ref('');
 const email = ref('');
 
+function validatePassword(password) {
+  if (password.length < 6) {
+    alert("Password should be at least 6 characters long.");
+    return false;
+  }
+  return true;
+}
+
 function handleSubmit() {
   if (password.value === password2.value) {
+    if (!validatePassword(password.value)) {
+      return;
+    }
     store.firstName = firstName.value;
     store.lastName = lastName.value;
     store.email = email.value;
@@ -32,22 +43,38 @@ function goToHome() {
 
 async function registerByEmail() {
   try {
-    const user = (await createUserWithEmailAndPassword(auth, email.value, password.value)).user;
+    if (!validatePassword(password.value)) {
+      return;
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    const user = userCredential.user;
+
     await updateProfile(user, { displayName: `${firstName.value} ${lastName.value}` });
     store.user = user;
+
+    console.log("User created:", user);
+
     router.push("/movies");
   } catch (error) {
-    alert("There was an error creating a user with email!");
+    console.error("Error creating user:", error);
+    alert("There was an error creating a user with email: " + error.message);
   }
 }
 
 async function registerByGoogle() {
   try {
-    const user = (await signInWithPopup(auth, new GoogleAuthProvider())).user;
+    const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
+    const user = userCredential.user;
+
     store.user = user;
+
+    console.log("User created via Google:", user);
+
     router.push("/movies");
   } catch (error) {
-    alert("There was an error creating a user with Google!");
+    console.error("Error creating user with Google:", error);
+    alert("There was an error creating a user with Google: " + error.message);
   }
 }
 </script>
@@ -64,14 +91,14 @@ async function registerByGoogle() {
       </div>
       <div class="form-container">
         <h2>Create an Account</h2>
-        <form @submit.prevent="handleSubmit">
+        <form @submit.prevent="registerByEmail">
           <input v-model="firstName" type="text" placeholder="First Name" class="input-field" required />
           <input v-model="lastName" type="text" placeholder="Last Name" class="input-field" required />
           <input v-model="email" type="email" placeholder="Email" class="input-field" required />
           <input v-model="password" type="password" placeholder="Password" class="input-field" required />
           <input v-model="password2" type="password" placeholder="Re-enter Password" class="input-field" required />
           <button type="submit" class="button register">Register</button>
-          <button @click="registerByGoogle()" class="button register">Register by Google</button>
+          <button type="button" @click="registerByGoogle" class="button register">Register by Google</button>
         </form>
       </div>
     </div>
@@ -225,5 +252,4 @@ async function registerByGoogle() {
     padding: 12px 25px;
   }
 }
-
 </style>

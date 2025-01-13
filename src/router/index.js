@@ -6,6 +6,8 @@ import MoviesView from '../views/MoviesView.vue';
 import DetailView from '../views/DetailsView.vue';
 import CartView from '../views/CartView.vue';
 import SettingsView from '../views/SettingsView.vue';
+import { userAuthorized, useStore } from '../stores';
+
 
 
 const routes = [

@@ -30,10 +30,6 @@ const loginByGoogle = async () => {
     alert("There was an error signing in with Google!");
   }
 };
-
-const goToHome = () => {
-  router.push("/");
-};
 </script>
 
 <template>
