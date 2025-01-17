@@ -8,6 +8,15 @@ const router = useRouter();
 function goBackToMovies() {
   router.push('/movies');
 }
+
+const checkout = () => {
+  store.cart.clear();
+  localStorage.removeItem('cart');
+  store.checkoutMessage = 'Thank you for your purchase!';
+  setTimeout(() => {
+    store.checkoutMessage = '';
+  }, 3000);
+};
 </script>
 
 <template>
@@ -20,40 +29,49 @@ function goBackToMovies() {
     </div>
     <button class="button back" @click="goBackToMovies">Back to Movie List</button>
   </div>
+
+        <button class="checkout-button" @click="checkout">Checkout</button>
+        <div v-if="store.checkoutMessage" class="thank-you-message">
+          {{ store.checkoutMessage }}
+        </div>
 </template>
 
 <style scoped>
 body {
   margin: 0;
   padding: 0;
-  background-color: #0d0d0d;
-  color: #f5f5f5;
+  background-color: #141414;
+  color: #fff;
   font-family: 'Poppins', sans-serif;
 }
 
 .cart {
   padding: 30px;
   text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #1f1f1f;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
 }
 
 .cart h1 {
-  font-size: 2.8rem;
-  color: #ff3d3d;
-  margin-bottom: 35px;
-  text-transform: capitalize;
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-size: 2.6rem;
+  color: #e50914;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1.5px;
 }
 
 .item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #1c1c1c;
+  background-color: #2a2a2a;
   border-radius: 12px;
-  padding: 20px;
-  margin: 20px auto;
-  max-width: 900px;
+  padding: 15px;
+  margin-bottom: 20px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
   transition: all 0.3s ease;
 }
@@ -64,38 +82,37 @@ body {
 }
 
 .item img {
-  width: 120px;
-  height: 180px;
+  width: 100px;
+  height: 150px;
   object-fit: cover;
   border-radius: 8px;
-  border: 2px solid #ff3d3d;
+  border: 2px solid #e50914;
 }
 
 .item h1 {
-  flex: 1;
-  font-size: 1.4rem;
-  margin-left: 20px;
-  text-align: left;
-  color: #f5f5f5;
+  font-size: 1.3rem;
+  color: #fff;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  margin-left: 20px;
+  flex: 1;
+  text-align: left;
 }
 
 .item button {
-  background: linear-gradient(90deg, #e50914, #ff3d3d);
-  color: white;
+  background: linear-gradient(90deg, #e50914, #b20710);
+  color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 12px 25px;
+  border-radius: 6px;
+  padding: 10px 20px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .item button:hover {
-  background: linear-gradient(90deg, #ff3d3d, #e50914);
-  transform: scale(1.1) rotate(-2deg);
+  background: linear-gradient(90deg, #b20710, #e50914);
+  transform: scale(1.05);
 }
 
 .item button:active {
@@ -103,27 +120,80 @@ body {
   background: #b20710;
 }
 
+.checkout-button {
+  width: auto;
+  padding: 12px 25px;
+  background: linear-gradient(90deg, #e50914, #b20710);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  margin: 20px auto;
+  display: block;
+}
+
+.checkout-button:hover {
+  background: linear-gradient(90deg, #b20710, #e50914);
+  transform: scale(1.05);
+}
+
+.checkout-button:active {
+  transform: scale(0.97);
+}
+
+.thank-you-message {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 1.3rem;
+  color: #e50914;
+  font-weight: bold;
+}
+
 .button.back {
   margin-top: 30px;
-  padding: 15px 30px;
-  background-color: #333333;
-  color: #ffffff;
+  padding: 12px 25px;
+  background-color: #333;
+  color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 1.2rem;
   font-weight: 700;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  width: 100%;
 }
 
 .button.back:hover {
-  background-color: #444444;
+  background-color: #444;
   transform: scale(1.05);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 .button.back:active {
   transform: scale(0.95);
-  background-color: #555555;
+  background-color: #555;
 }
+
+@media (max-width: 768px) {
+  .cart {
+    padding: 20px;
+  }
+
+  .cart h1 {
+    font-size: 2rem;
+  }
+
+  .item h1 {
+    font-size: 1rem;
+  }
+
+  .checkout-button, .button.back {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+}
+
 </style>

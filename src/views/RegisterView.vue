@@ -20,7 +20,7 @@ function validatePassword(password) {
     return false;
   }
   return true;
-}
+}                     
 
 function handleSubmit() {
   if (password.value === password2.value) {

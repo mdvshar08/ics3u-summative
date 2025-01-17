@@ -1,35 +1,41 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
-  import { useRoute } from 'vue-router';
-  import { useStore } from '../stores';
+import { onMounted, ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useStore } from '../stores';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase';
 
   const isHomePage = ref(false);
   const route = useRoute();
-  const userStore = useStore();
+  const store = useStore();
+  const router = useRouter();
 
   onMounted(() => {
     if (route.path === '/') {
       isHomePage.value = true;
     }
   });
+  const logout = () => {
+  store.user = null;
+  signOut(auth);
+  router.push("/");
+}
 </script>
 
 <template>
   <div class="header">
     <h1> BingeBox </h1>
-    <p v-if="!isHomePage && userStore.firstName && !['/register', '/login'].includes(route.path)">
-      Hello {{ userStore.firstName }}!
-    </p>
   </div>
   <div class="buttons" v-if="isHomePage">
     <RouterLink to="/register" class="button">Register</RouterLink>
     <RouterLink to="/login" class="button">Login</RouterLink>
   </div>
   <div class="buttons" v-if="!isHomePage">
+    <p class="welcome-message">Welcome, {{ store.user?.displayName || 'Guest' }}</p>
     <RouterLink to="/cart" class="button">Cart</RouterLink>
     <RouterLink to="/settings" class="button">Settings</RouterLink>
-    <RouterLink to="/" class="button">Logout</RouterLink> 
-  </div>
+    <button @click="logout" class="button">Logout</button>
+   </div>
 </template>
 <style scoped>
 body {
