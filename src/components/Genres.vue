@@ -17,28 +17,33 @@
   };
 
   onMounted(getMovieByGenre);
+
+  function addToCart(movie) {
+    store.cart.set(String(movie.id), { title: movie.title || item.name, url: movie.poster_path })
+    localStorage.setItem(`cart_${store.user.email}`, JSON.stringify(Object.fromEntries(store.cart)));
+}
 </script>
 
 <template>
   <div class="movie-gallery">
-    <select v-model="selectedGenre" @change="getMovieByGenre">
-      <option v-for="genre of genres" :value="genre.id" :key="genre.id">{{ genre.genreName }}</option>
-    </select>
-    <div v-if="response" class="movie-list">
-      <div v-for="movie in response.data.results" :key="movie.id" class="movie-card"
-        @click="router.push(`/movies/${movie.id}`)">
-        <img :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`" alt="Movie Poster" class="movie-poster" />
-        <p class="movie-title">{{ movie.title }}</p>
-        <button v-if="!store.cart.has(movie.id)"
-          @click.stop="store.addToCart(movie.id, { title: movie.title, url: movie.poster_path })" class="movie-site">
-          Buy
-        </button>
-        <button v-else @click.stop="store.removeFromCart(movie.id)" class="movie-site added"
-          :disabled="store.cart.has(movie.id)">
-          Added
-        </button>
+      <select v-model="selectedGenre" @change="getMovieByGenre">
+          <option v-for="genre of genres" :value="genre.id" :key="genre.id">{{ genre.genreName }}</option>
+      </select>
+      <div v-if="response" class="movie-list">
+          <div v-for="movie in response.data.results" :key="movie.id" class="movie-card">
+              <div @click="router.push(`/movies/${movie.id}`)">
+                  <img :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`" alt="Movie Poster"
+                      class="movie-poster" />
+                  <p class="movie-title">{{ movie.title }}</p>
+              </div>
+              <button v-if="!store.cart.has(String(movie.id))" @click="addToCart(movie)" class="buy-button">
+                  Buy
+              </button>
+              <button v-else class="buy-button">
+                  Added
+              </button>
+          </div>
       </div>
-    </div>
   </div>
 </template>
 
@@ -59,6 +64,12 @@ select {
   padding: 10px;
   margin-bottom: 20px;
   font-size: 16px;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(229, 9, 20, 0.8);
 }
 
 .movie-list {
@@ -90,31 +101,51 @@ select {
   text-align: center;
   font-size: 14px;
   padding: 10px;
+  color: #e5e5e5;
 }
 
-.movie-site {
+.buy-button {
   display: block;
-  width: 100%;
-  text-align: center;
-  padding: 10px;
-  background-color: #e50914;
-  color: #ffffff;
-  border: none;
+  width: 80%;
+  margin: 10px auto 20px;
+  padding: 10px 20px;
   font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #e50914;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.3s;
+  text-align: center;
 }
 
-.movie-site:hover {
-  background-color: #f6121d;
+.buy-button:hover {
+  background-color: #444444;
 }
 
-.movie-site.added {
+.buy-button:disabled {
   background-color: #555;
   cursor: not-allowed;
 }
 
-.movie-site.added:hover {
-  background-color: #555;
+.buy-button.added {
+  background-color: #444444;
+  cursor: not-allowed;
+}
+
+.buy-button.added:hover {
+  background-color: #960209;
+}
+
+@media (max-width: 768px) {
+  .movie-title {
+    font-size: 12px;
+  }
+
+  .buy-button {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
 }
 </style>

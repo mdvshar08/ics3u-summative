@@ -39,7 +39,7 @@ const loginByGoogle = async () => {
         <h1>BingeBox</h1>
         <div class="button-group">
           <RouterLink to="/register" class="button register">Register</RouterLink>
-          <button @click="goToHome" class="button back">Back to Home</button>
+          <RouterLink to="/" class="button home">Back to Home</RouterLink>
         </div>
       </div>
       <div class="form-container">
@@ -48,8 +48,7 @@ const loginByGoogle = async () => {
           <input v-model="email" type="email" placeholder="Email" class="input-field" required />
           <input v-model="password" type="password" placeholder="Password" class="input-field" required />
           <button type="submit" class="button login">Login</button>
-          <button @click="loginByGoogle()" class="button register-google">Register by Google</button>
-
+          <button @click="loginByGoogle()" class="button register-google">Login by Google</button>
         </form>
       </div>
     </div>
@@ -118,14 +117,14 @@ const loginByGoogle = async () => {
 }
 
 .navbar .register:hover {
+  background: #444444;
+}
+
+.navbar .home {
   background: #f40612;
 }
 
-.navbar .back {
-  background: #333333;
-}
-
-.navbar .back:hover {
+.navbar .home:hover {
   background: #444444;
 }
 
@@ -176,7 +175,24 @@ form {
 }
 
 .button.login:hover {
-  background: #f40612;
+  background: #444444;
+  transform: scale(1.05);
+}
+
+.button.register-google {
+  background-color: #e50914;
+  color: white;
+  font-size: 1rem;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button.register-google:hover {
+  background-color: #444444;
   transform: scale(1.05);
 }
 
@@ -198,23 +214,4 @@ form {
     padding: 10px 20px;
   }
 }
-
-/* Style for the 'Register by Google' button */
-.button.register-google {
-  background-color: #e50914; /* Google blue color */
-  color: white;
-  font-size: 1rem;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  transition: background-color 0.3s ease;
-}
-
-.button.register-google:hover {
-  background-color: #e50914; /* Darker blue on hover */
-  transform: scale(1.05);
-}
-
 </style>

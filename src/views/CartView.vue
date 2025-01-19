@@ -2,198 +2,164 @@
 import { useStore } from '../stores';
 import { useRouter } from 'vue-router';
 
+
 const store = useStore();
-const router = useRouter();
 
-function goBackToMovies() {
-  router.push('/movies');
-}
+function removeItem(key) {
+    store.cart.delete(key)
+    localStorage.setItem(`cart_${store.user.email}`, JSON.stringify(Object.fromEntries(store.cart)));
+  }
 
-const checkout = () => {
-  store.cart.clear();
-  localStorage.removeItem('cart');
-  store.checkoutMessage = 'Thank you for your purchase!';
-  setTimeout(() => {
-    store.checkoutMessage = '';
-  }, 3000);
-};
+  function clearCart() {
+    store.cart.clear();
+    localStorage.removeItem(`cart_${store.user.email}`);
+    alert("Thank you for your purchase!");
+  }
+
 </script>
 
 <template>
-  <div class="cart">
-    <h1>Shopping Cart</h1>
-    <div class="item" v-for="([key, value]) in store.cart" :key="key">
-      <img :src="`https://image.tmdb.org/t/p/w500${value.url}`" alt="Movie Poster" />
-      <h1>{{ value.title }}</h1>
-      <button @click="store.cart.delete(key)">Remove</button>
-    </div>
-    <button class="button back" @click="goBackToMovies">Back to Movie List</button>
-  </div>
-
-        <button class="checkout-button" @click="checkout">Checkout</button>
+    <div class="cart">
+      <RouterLink to="/movies" class="back-button">Back To Movies</RouterLink>
+        <h2>Shopping Cart</h2>
+        <div class="item" v-for="([key, value]) in store.cart" :key="key">
+            <img :src="`https://image.tmdb.org/t/p/w500${value.url}`" />
+            <div class="item-details">
+                <h3>{{ value.title }}</h3>
+                <button @click="removeItem(key)">Remove</button>
+            </div>
+        </div>
+        <button class="checkout-button" @click="clearCart">Checkout</button>
         <div v-if="store.checkoutMessage" class="thank-you-message">
           {{ store.checkoutMessage }}
         </div>
+    </div>
 </template>
 
 <style scoped>
 body {
+  background-color: #141414; 
+  color: #fff;
+  font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #141414;
-  color: #fff;
-  font-family: 'Poppins', sans-serif;
 }
 
 .cart {
-  padding: 30px;
-  text-align: center;
-  max-width: 900px;
-  margin: 0 auto;
-  background-color: #1f1f1f;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #1f1f1f; 
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 }
 
-.cart h1 {
-  font-size: 2.6rem;
+.cart h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
   color: #e50914;
-  margin-bottom: 25px;
-  text-transform: uppercase;
-  font-weight: bold;
-  letter-spacing: 1.5px;
+  text-align: center;
+}
+
+.back-button {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #fff;
+  background: #e50914;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.back-button:hover {
+  background: #444444;
 }
 
 .item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background-color: #2a2a2a;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 20px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
-  transition: all 0.3s ease;
-}
-
-.item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+  background: #222;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 6px;
 }
 
 .item img {
-  width: 100px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #e50914;
+  width: 120px;
+  height: auto;
+  border-radius: 4px;
+  margin-right: 1rem;
 }
 
-.item h1 {
-  font-size: 1.3rem;
-  color: #fff;
-  font-weight: 600;
-  margin-left: 20px;
+.item-details {
   flex: 1;
-  text-align: left;
 }
 
-.item button {
-  background: linear-gradient(90deg, #e50914, #b20710);
+.item-details h3 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.item-details button {
+  background: #e50914;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
+  padding: 0.5rem 1rem;
   font-size: 1rem;
-  font-weight: bold;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease;
 }
 
-.item button:hover {
-  background: linear-gradient(90deg, #b20710, #e50914);
-  transform: scale(1.05);
-}
-
-.item button:active {
-  transform: scale(0.95);
-  background: #b20710;
+.item-details button:hover {
+  background: #444444;
 }
 
 .checkout-button {
-  width: auto;
-  padding: 12px 25px;
-  background: linear-gradient(90deg, #e50914, #b20710);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-  margin: 20px auto;
   display: block;
+  width: 100%;
+  background: #e50914;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 1.5rem;
+  transition: background 0.3s ease;
 }
 
 .checkout-button:hover {
-  background: linear-gradient(90deg, #b20710, #e50914);
-  transform: scale(1.05);
-}
-
-.checkout-button:active {
-  transform: scale(0.97);
+  background: #444444;
 }
 
 .thank-you-message {
   text-align: center;
-  margin-top: 25px;
-  font-size: 1.3rem;
-  color: #e50914;
-  font-weight: bold;
-}
-
-.button.back {
-  margin-top: 30px;
-  padding: 12px 25px;
-  background-color: #333;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  margin-top: 1rem;
   font-size: 1.2rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-  width: 100%;
-}
-
-.button.back:hover {
-  background-color: #444;
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-}
-
-.button.back:active {
-  transform: scale(0.95);
-  background-color: #555;
+  color: #43a047;
 }
 
 @media (max-width: 768px) {
-  .cart {
-    padding: 20px;
+  .item {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .cart h1 {
-    font-size: 2rem;
+  .item img {
+    width: 100%;
+    margin-bottom: 1rem;
   }
 
-  .item h1 {
-    font-size: 1rem;
-  }
-
-  .checkout-button, .button.back {
-    font-size: 1rem;
-    padding: 10px 20px;
+  .checkout-button {
+    font-size: 1.2rem;
+    padding: 0.8rem;
   }
 }
-
 </style>

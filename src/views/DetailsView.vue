@@ -16,8 +16,8 @@
 <template>
   <Header />
   <div class="details-view">
-    <Details :id="movieId" />
     <button @click="router.push('/movies')">Back to Movies</button>
+    <Details :id="movieId" />
   </div>
   <Footer />
 </template>
@@ -46,7 +46,7 @@ button {
 }
 
 button:hover {
-  background-color: #f40612;
+  background-color: #444444;
   transform: translateY(-2px) scale(1.03);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
 }

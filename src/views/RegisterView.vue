@@ -14,67 +14,39 @@ const firstName = ref('');
 const lastName = ref('');
 const email = ref('');
 
-function validatePassword(password) {
-  if (password.length < 6) {
-    alert("Password should be at least 6 characters long.");
-    return false;
-  }
-  return true;
-}                     
-
-function handleSubmit() {
-  if (password.value === password2.value) {
-    if (!validatePassword(password.value)) {
-      return;
-    }
-    store.firstName = firstName.value;
-    store.lastName = lastName.value;
-    store.email = email.value;
-    store.password = password.value;
-    router.push('/movies');
-  } else {
-    window.alert('Passwords do not match; Please re-enter');
-  }
-}
-
-function goToHome() {
-  router.push('/');
-}
-
 async function registerByEmail() {
-  try {
-    if (!validatePassword(password.value)) {
-      return;
+  if (password.value === reEnterPassword.value) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+      const user = userCredential.user;
+
+      store.firstName = firstName.value;
+      store.lastName = lastName.value;
+      store.email = email.value;
+      store.password = password.value;
+
+      await updateProfile(user, { displayName: `${firstName.value} ${lastName.value}` });
+
+      store.user = user;
+
+      router.push("/movies");
+    } catch (error) {
+      alert("There was an error creating a user with email!");
     }
-
-    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    const user = userCredential.user;
-
-    await updateProfile(user, { displayName: `${firstName.value} ${lastName.value}` });
-    store.user = user;
-
-    console.log("User created:", user);
-
-    router.push("/movies");
-  } catch (error) {
-    console.error("Error creating user:", error);
-    alert("There was an error creating a user with email: " + error.message);
+  } else {
+    window.alert("The passwords are not the same!");
   }
 }
 
 async function registerByGoogle() {
   try {
-    const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
-    const user = userCredential.user;
-
-    store.user = user;
-
-    console.log("User created via Google:", user);
+    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    store.user = result.user;
 
     router.push("/movies");
   } catch (error) {
-    console.error("Error creating user with Google:", error);
-    alert("There was an error creating a user with Google: " + error.message);
+    console.error("Error during Google sign-in:", error.message);
+    alert("There was an error creating a user with Google!");
   }
 }
 </script>
@@ -85,8 +57,8 @@ async function registerByGoogle() {
       <div class="navbar">
         <h1>BingeBox</h1>
         <div class="button-group">
-          <a href="login" class="button login">Login</a>
-          <button class="button back" @click="goToHome">Back to Home</button>
+          <RouterLink to="/" class="nav-button">Home</RouterLink>
+          <RouterLink to="/login" class="nav-button">Login</RouterLink>
         </div>
       </div>
       <div class="form-container">
@@ -107,36 +79,33 @@ async function registerByGoogle() {
 
 <style scoped>
 .hero {
-  background-image: url('your-image-url-here.jpg');
-  background-size: cover;
-  background-position: center;
+  background-color: #141414;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  background-color: #0d0d0d;
 }
 
 .overlay {
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+  background-color: rgba(0, 0, 0, 0.8);
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  padding: 40px 20px;
+  color: white;
+  padding: 20px;
 }
 
 .navbar {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 25px 40px;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.8);
+  padding: 20px 40px;
+  background: rgba(0, 0, 0, 0.85);
   position: absolute;
   top: 0;
   z-index: 10;
@@ -145,9 +114,8 @@ async function registerByGoogle() {
 .navbar h1 {
   font-size: 2.5rem;
   font-family: 'Poppins', sans-serif;
+  font-weight: bold;
   color: #e50914;
-  font-weight: 700;
-  letter-spacing: 1.2px;
 }
 
 .button-group {
@@ -155,101 +123,91 @@ async function registerByGoogle() {
   gap: 10px;
 }
 
-.navbar .login,
-.navbar .back {
-  background-color: #e50914;
-  color: #ffffff;
-  padding: 10px 20px;
-  text-decoration: none;
-  border: none;
+.nav-button {
+  padding: 12px 25px;
   font-size: 1rem;
   font-weight: bold;
+  color: white;
+  background-color: #e50914;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.navbar .login:hover,
-.navbar .back:hover {
-  background-color: #f40612;
+.nav-button:hover {
+  background-color: #444444;
   transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .form-container {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 50px;
+  width: 100%;
+  max-width: 400px;
 }
 
 .form-container h2 {
-  font-size: 2.5rem;
-  color: #ffffff;
-  margin-bottom: 30px;
+  font-size: 2.2rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  margin-bottom: 25px;
 }
 
-.form-container form {
+form {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 15px;
 }
 
 .input-field {
-  padding: 15px 20px;
+  padding: 15px;
   width: 100%;
-  max-width: 400px;
-  border: 1px solid #444;
-  margin-bottom: 0;
-  transition: border-color 0.3s, background-color 0.3s;
-  background-color: #1c1c1c;
-  color: #ffffff;
-  font-size: 1rem;
   border-radius: 5px;
+  border: 2px solid #333;
+  background-color: #1c1c1c;
+  color: white;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
 }
 
 .input-field:focus {
   border-color: #e50914;
-  background-color: #333;
   outline: none;
 }
 
-.register {
-  background-color: #e50914;
-  color: #ffffff;
+.button.register {
+  background: #e50914;
+  color: white;
   padding: 12px 30px;
-  border: none;
   font-size: 1rem;
-  font-weight: bold;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.register:hover {
-  background-color: #f40612;
+.button.register:hover {
+  background: #444444;
   transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 600px) {
-  .input-field {
-    width: 90%;
-  }
-
   .navbar h1 {
     font-size: 2rem;
   }
 
-  .form-container h2 {
-    font-size: 2rem;
+  .input-field {
+    width: 100%;
   }
 
-  .register {
-    font-size: 1rem;
-    padding: 12px 25px;
+  .form-container h2 {
+    font-size: 1.8rem;
+  }
+
+  .button {
+    font-size: 0.9rem;
+    padding: 10px 20px;
   }
 }
 </style>

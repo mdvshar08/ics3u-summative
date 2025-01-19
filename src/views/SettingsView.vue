@@ -1,47 +1,94 @@
 <script setup>
 import { ref } from 'vue';
+import { useStore } from '../stores';
 import { useRouter } from 'vue-router';
-import { useStore } from "../stores";
+import { updateProfile, updatePassword } from 'firebase/auth';
+import { auth } from '../firebase';
+import Header from '@/components/Header.vue';
 
 const store = useStore();
-const firstName = ref(store.firstName);
-const lastName = ref(store.lastName);
-const email = ref(store.email);
-
 const router = useRouter();
 
-function handleSave() {
-  store.firstName = firstName.value;
-  store.lastName = lastName.value;
+const user = store.user;
+const firstName = ref(user?.displayName?.split(' ')[0] || '');
+const lastName = ref(user?.displayName?.split(' ')[1] || '');
+const password = ref('');
+const email = ref(user?.email || '');
 
-  alert("Your changes have been saved!");
-  router.push("/movies");
-}
+const handleSubmit = async () => {
+  let logedInWithPassword = false;
+  auth.currentUser.providerData.forEach((provider) => {
+    if (provider.providerId === 'password') {
+      logedInWithPassword = true;
+    }
+  });
 
-function goBackToMovies() {
-  router.push("/movies");
-}
+  if (logedInWithPassword) {
+    try {
+      await updateProfile(auth.currentUser, { displayName: `${firstName.value} ${lastName.value}` });
+      await updatePassword(auth.currentUser, password.value);
+      alert('Your profile has been updated!');
+      router.push('/movies');
+    } catch (error) {
+      alert('There was an error updating your profile. Please try again.');
+    }
+  } else {
+    alert('Profile changes are not allowed for Google sign-in users.');
+  }
+};
 </script>
 
 <template>
+  <Header />
   <div class="blockflix-theme">
     <div class="settings-view">
       <h1>User Settings</h1>
-      <form @submit.prevent="handleSave">
+      <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="firstName">First Name:</label>
-          <input v-model="firstName" id="firstName" type="text" placeholder="Enter first name" class="input-field" />
+          <input
+            v-model="firstName"
+            type="text"
+            id="firstName"
+            class="input-field"
+            placeholder="Enter first name"
+            required
+          />
         </div>
         <div class="form-group">
           <label for="lastName">Last Name:</label>
-          <input v-model="lastName" id="lastName" type="text" placeholder="Enter last name" class="input-field" />
+          <input
+            v-model="lastName"
+            type="text"
+            id="lastName"
+            class="input-field"
+            placeholder="Enter last name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">New Password:</label>
+          <input
+            v-model="password"
+            type="password"
+            id="password"
+            class="input-field"
+            placeholder="Enter a new password"
+            required
+          />
         </div>
         <div class="form-group">
           <label for="email">Email:</label>
-          <input :value="email" id="email" type="email" class="input-field" disabled />
+          <input
+            :value="email"
+            type="email"
+            id="email"
+            class="input-field"
+            disabled
+          />
         </div>
         <button type="submit" class="button save">Save Changes</button>
-        <button type="button" class="button back" @click="goBackToMovies">Back to Movie List</button>
+        <RouterLink to="/movies" class="button back">Back to Movies</RouterLink>
       </form>
     </div>
   </div>
@@ -68,45 +115,44 @@ function goBackToMovies() {
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
   border: 3px solid #e50914;
+  text-align: center;
 }
 
 h1 {
-  text-align: center;
   color: #e50914;
   margin-bottom: 25px;
   font-weight: 900;
-  font-size: 2.8rem;
-  letter-spacing: 3px;
+  font-size: 2.4rem;
+  letter-spacing: 2px;
   text-transform: uppercase;
 }
 
 .form-group {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-size: 1.1rem;
   color: #e5e5e5;
-  font-weight: 600;
 }
 
 .input-field {
   width: 100%;
-  padding: 14px;
-  border: 2px solid #444444;
-  border-radius: 8px;
+  padding: 12px;
   font-size: 1rem;
-  color: #ffffff;
+  border: 2px solid #444444;
+  border-radius: 6px;
   background-color: #2a2a2a;
-  transition: all 0.3s ease;
+  color: #ffffff;
+  transition: border-color 0.3s ease;
 }
 
 .input-field:focus {
   background-color: #121212;
-  border: 2px solid #e50914;
-  box-shadow: 0 0 12px rgba(255, 9, 20, 0.8);
+  border-color: #e50914;
 }
 
 .input-field:disabled {
@@ -117,21 +163,21 @@ label {
 
 .button.save {
   width: 100%;
-  padding: 16px;
-  background: linear-gradient(90deg, #e50914, #b20710);
+  padding: 14px;
+  background: #e50914;
   color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-size: 1.2rem;
+  border-radius: 6px;
+  font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  margin-top: 15px;
+  transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
 .button.save:hover {
-  background: linear-gradient(90deg, #b20710, #e50914);
   transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(255, 9, 20, 0.7);
+  background-color: #b20710;
 }
 
 .button.save:active {
@@ -139,23 +185,23 @@ label {
 }
 
 .button.back {
-  margin-top: 10px;
+  margin-top: 15px;
+  display: block;
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background: #333333;
   color: #ffffff;
-  border: none;
+  text-align: center;
   border-radius: 6px;
   font-size: 1.1rem;
   font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .button.back:hover {
   background-color: #444444;
   transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 768px) {
@@ -165,14 +211,12 @@ label {
 
   h1 {
     font-size: 2rem;
-    letter-spacing: 1.5px;
   }
 
   .button.save,
   .button.back {
     font-size: 1rem;
-    padding: 12px;
+    padding: 10px;
   }
 }
-
 </style>
