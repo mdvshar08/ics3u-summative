@@ -15,7 +15,12 @@ const lastName = ref('');
 const email = ref('');
 
 async function registerByEmail() {
-  if (password.value === reEnterPassword.value) {
+  if (!firstName.value || !lastName.value || !email.value || !password.value || !password2.value) {
+    alert("Please fill in all the fields!");
+    return;
+  }
+
+  if (password.value === password2.value) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
       const user = userCredential.user;
@@ -31,24 +36,34 @@ async function registerByEmail() {
 
       router.push("/movies");
     } catch (error) {
-      alert("There was an error creating a user with email!");
+      console.error("Firebase Error:", error.code, error.message);
+      alert(`Error: ${error.message}`);
     }
   } else {
-    window.alert("The passwords are not the same!");
+    alert("The passwords do not match!");
   }
 }
 
 async function registerByGoogle() {
   try {
-    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    await auth.signOut();
+
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: "select_account" 
+    });
+
+    const result = await signInWithPopup(auth, provider);
+
     store.user = result.user;
 
     router.push("/movies");
   } catch (error) {
-    console.error("Error during Google sign-in:", error.message);
+    console.error("Error during Google sign-in:", error.code, error.message);
     alert("There was an error creating a user with Google!");
   }
 }
+
 </script>
 
 <template>

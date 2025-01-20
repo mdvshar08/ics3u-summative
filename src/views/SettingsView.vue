@@ -16,26 +16,25 @@ const password = ref('');
 const email = ref(user?.email || '');
 
 const handleSubmit = async () => {
+  if (logedInWithPassword) {
+    try {
+      await updateProfile(user, { displayName: `${firstName.value} ${lastName.value}` });
+      await updatePassword(user, password.value);
+      router.push("/movies");
+    } catch (error) {
+      alert("There was an error updating your profile!");
+    }
+  } else {
+    alert("Signed in with Google!");
+  }
+};
+
   let logedInWithPassword = false;
   auth.currentUser.providerData.forEach((provider) => {
-    if (provider.providerId === 'password') {
+    if (provider.providerId == "password") {
       logedInWithPassword = true;
     }
   });
-
-  if (logedInWithPassword) {
-    try {
-      await updateProfile(auth.currentUser, { displayName: `${firstName.value} ${lastName.value}` });
-      await updatePassword(auth.currentUser, password.value);
-      alert('Your profile has been updated!');
-      router.push('/movies');
-    } catch (error) {
-      alert('There was an error updating your profile. Please try again.');
-    }
-  } else {
-    alert('Profile changes are not allowed for Google sign-in users.');
-  }
-};
 </script>
 
 <template>
@@ -46,46 +45,19 @@ const handleSubmit = async () => {
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="firstName">First Name:</label>
-          <input
-            v-model="firstName"
-            type="text"
-            id="firstName"
-            class="input-field"
-            placeholder="Enter first name"
-            required
-          />
+          <input v-model="firstName" type="text" id="firstName" class="input-field" placeholder="Enter first name" required/>
         </div>
         <div class="form-group">
           <label for="lastName">Last Name:</label>
-          <input
-            v-model="lastName"
-            type="text"
-            id="lastName"
-            class="input-field"
-            placeholder="Enter last name"
-            required
-          />
+          <input v-model="lastName" type="text" id="lastName" class="input-field" placeholder="Enter last name" required/>
         </div>
         <div class="form-group">
           <label for="password">New Password:</label>
-          <input
-            v-model="password"
-            type="password"
-            id="password"
-            class="input-field"
-            placeholder="Enter a new password"
-            required
-          />
+          <input v-model="password" type="password" id="password" class="input-field" placeholder="Enter a new password" required/>
         </div>
         <div class="form-group">
           <label for="email">Email:</label>
-          <input
-            :value="email"
-            type="email"
-            id="email"
-            class="input-field"
-            disabled
-          />
+          <input :value="email" type="email" id="email" class="input-field" disabled/>
         </div>
         <button type="submit" class="button save">Save Changes</button>
         <RouterLink to="/movies" class="button back">Back to Movies</RouterLink>
